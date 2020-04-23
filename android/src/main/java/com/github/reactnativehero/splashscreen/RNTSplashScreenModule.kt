@@ -11,11 +11,6 @@ class RNTSplashScreenModule(private val reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun show() {
-        RNTSplashScreenModule.show(reactContext)
-    }
-
-    @ReactMethod
     fun hide() {
         RNTSplashScreenModule.hide()
     }

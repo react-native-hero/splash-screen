@@ -36,7 +36,7 @@ RCT_EXPORT_MODULE(RNTSplashScreen);
 
 + (void)hide {
     
-    if (isShowing) {
+    if (!isShowing) {
         return;
     }
     
@@ -56,10 +56,6 @@ RCT_EXPORT_MODULE(RNTSplashScreen);
 
 + (void)onJavaScriptError:(NSNotification *)notification {
     [RNTSplashScreen hide];
-}
-
-RCT_EXPORT_METHOD(show) {
-    [RNTSplashScreen show];
 }
 
 RCT_EXPORT_METHOD(hide) {
