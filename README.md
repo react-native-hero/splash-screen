@@ -38,7 +38,7 @@ $ react-native link @react-native-hero/splash-screen
 
 ## Setup
 
-Make sure you understand the native layout, this module does not support image as a flash screen.
+Make sure you understand the native layout, this module does not support image as a splash screen.
 
 * iOS: LaunchScreen.xib
 * Android: android/app/src/main/res/layout/splash_screen_default.xml
