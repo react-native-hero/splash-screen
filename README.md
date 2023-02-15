@@ -53,7 +53,8 @@ Make sure you understand the native layout, this module does not support image a
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   ...
-  [RNTSplashScreen show];
+  [super application:application didFinishLaunchingWithOptions:launchOptions];
+  [RNTSplashScreen show:self.window.rootViewController.view storyboardName:@"LaunchScreen"];
   return YES;
 }
 ```

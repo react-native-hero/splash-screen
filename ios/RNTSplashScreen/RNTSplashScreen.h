@@ -2,7 +2,7 @@
 
 @interface RNTSplashScreen : NSObject <RCTBridgeModule>
 
-+ (void)show;
++ (void)show:(UIView *)rootView storyboardName:(NSString *)storyboardName;
 + (void)hide;
 
 @end

@@ -19,7 +19,7 @@ class RNTSplashScreenModule(private val reactContext: ReactApplicationContext) :
 
         private var sharedDialog: Dialog? = null
 
-        fun show(context: Context) {
+        @JvmStatic fun show(context: Context) {
 
             val dialog = Dialog(context, R.style.splash_screen_default)
             dialog.setContentView(R.layout.splash_screen_default)

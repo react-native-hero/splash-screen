@@ -1,36 +1,55 @@
 #import "RNTSplashScreen.h"
 #import <React/RCTBridge.h>
+#import <React/RCTRootView.h>
 
 @implementation RNTSplashScreen
 
-static BOOL hasJavaScriptErrorObserver = NO;
-
+static BOOL hasJavaScriptDidFailToLoadObserver = NO;
+static BOOL hasContentDidAppearObserver = YES;
 static BOOL isShowing = NO;
 
-RCT_EXPORT_MODULE(RNTSplashScreen);
+static RCTRootView *rootView = nil;
 
-// 显示默认开屏
-+ (void)show {
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
+
+- (dispatch_queue_t)methodQueue {
+    return dispatch_queue_create("com.github.reactnativehero.splash_screen", DISPATCH_QUEUE_SERIAL);
+}
+
++ (void)show:(UIView *)view storyboardName:(NSString *)storyboardName {
+    
+    if (!hasJavaScriptDidFailToLoadObserver) {
+        
+        [NSNotificationCenter.defaultCenter addObserver:self
+                                               selector:@selector(onJavaScriptDidFailToLoad:)
+                                                   name:RCTJavaScriptDidFailToLoadNotification
+                                                 object:nil
+        ];
+
+        hasJavaScriptDidFailToLoadObserver = YES;
+        
+    }
+    
+    if (hasContentDidAppearObserver) {
+        
+        [[NSNotificationCenter defaultCenter] removeObserver:view
+                                                      name:RCTContentDidAppearNotification
+                                                    object:view];
+        
+        hasContentDidAppearObserver = NO;
+        
+    }
     
     if (isShowing) {
         return;
     }
     
-    isShowing = YES;
+    rootView = (RCTRootView *)view;
     
-    if (!hasJavaScriptErrorObserver) {
-        
-        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(onJavaScriptError:) name:RCTJavaScriptDidFailToLoadNotification
-            object:nil
-        ];
-
-        hasJavaScriptErrorObserver = YES;
-        
-    }
-
-    while (isShowing) {
-        [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-    }
+    [self showLoadingView:storyboardName];
+    isShowing = YES;
     
 }
 
@@ -40,23 +59,43 @@ RCT_EXPORT_MODULE(RNTSplashScreen);
         return;
     }
     
+    [self hideLoadingView];
     isShowing = NO;
     
-    if (hasJavaScriptErrorObserver) {
+    if (hasJavaScriptDidFailToLoadObserver) {
         
-        [NSNotificationCenter.defaultCenter removeObserver:self name:RCTJavaScriptDidFailToLoadNotification
-            object:nil
+        [NSNotificationCenter.defaultCenter removeObserver:self
+                                                   name:RCTJavaScriptDidFailToLoadNotification
+                                                 object:nil
         ];
-        
-        hasJavaScriptErrorObserver = NO;
+
+        hasJavaScriptDidFailToLoadObserver = NO;
         
     }
     
 }
 
-+ (void)onJavaScriptError:(NSNotification *)notification {
++ (void)showLoadingView:(NSString *)storyboardName {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:nil];
+        UIView *loadingView = [[storyboard instantiateInitialViewController] view];
+        [rootView setLoadingView:loadingView];
+    });
+}
+
++ (void)hideLoadingView {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        rootView.loadingView.hidden = YES;
+        [rootView.loadingView removeFromSuperview];
+        rootView.loadingView = nil;
+    });
+}
+
++ (void)onJavaScriptDidFailToLoad:(NSNotification *)notification {
     [RNTSplashScreen hide];
 }
+
+RCT_EXPORT_MODULE(RNTSplashScreen);
 
 RCT_EXPORT_METHOD(hide) {
     [RNTSplashScreen hide];
