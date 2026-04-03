@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.view.View
 import android.view.WindowManager
+import android.graphics.Color
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -25,57 +26,61 @@ class RNTSplashScreenModule(private val reactContext: ReactApplicationContext) :
 
         @JvmStatic
         fun show(context: Context) {
+            if (sharedDialog != null) {
+                return
+            }
 
-            val dialog = Dialog(context, R.style.splash_screen_default)
+            val dialog = Dialog(context, R.style.splash_screen_dialog)
             dialog.setContentView(R.layout.splash_screen_default)
             dialog.setCancelable(false)
+            dialog.setCanceledOnTouchOutside(false)
 
             dialog.window?.let { window ->
-                // 全屏布局
+                // 1. 铺满屏幕（包括状态栏区域）
                 window.setLayout(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT
                 )
 
-                // 沉浸式状态栏（替代废弃的 systemUiVisibility）
+                // 2. 关键 Flags 设置
+                // 确保绘制系统栏背景（配合透明颜色使用）
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                    window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+                    // 显式设置透明色
+                    window.statusBarColor = Color.TRANSPARENT
+                    window.navigationBarColor = Color.TRANSPARENT
                 }
 
-                // Android 11+ 新API：全屏沉浸
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    window.setDecorFitsSystemWindows(false)
-                } else {
-                    @Suppress("DEPRECATION")
-                    window.decorView.systemUiVisibility = (
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    )
-                }
-
-                // Android 4.4 兼容
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    @Suppress("DEPRECATION")
-                    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                }
+                // 3. 布局行为：让内容延伸到系统栏下方
+                // 移除 SYSTEM_UI_FLAG_FULLSCREEN，这样状态栏才会显示
+                // 保留 LAYOUT_STABLE 和 LAYOUT_FULLSCREEN，这样布局内容会顶到最上面
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                )
             }
 
-            dialog.show()
-            sharedDialog = dialog
+            try {
+                dialog.show()
+                sharedDialog = dialog
+            }
+            catch (e: Exception) {
+                // 防止鸿蒙崩溃
+            }
         }
 
         fun hide() {
-
-            val dialog = sharedDialog ?: return
-
-            if (dialog.isShowing) {
-                dialog.dismiss()
+            try {
+                sharedDialog?.takeIf { it.isShowing }?.dismiss()
             }
-
-            sharedDialog = null
-
+            catch (e: Exception) {
+            }
+            finally {
+                sharedDialog = null
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@react-native-hero/splash-screen",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "react native splash screen",
   "main": "index.js",
   "scripts": {

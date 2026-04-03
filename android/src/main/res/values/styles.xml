@@ -1,16 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="splash_screen_animation">
-        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
-    </style>
 
-    <style name="splash_screen_default" parent="Theme.AppCompat.Dialog">
-        <item name="android:windowAnimationStyle">@style/splash_screen_animation</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">false</item>  <!-- Dialog占满全屏 -->
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
+  <style name="splash_screen_dialog" parent="android:Theme.Black.NoTitleBar">
+    <!-- 1. 去掉强制全屏，允许状态栏存在 -->
+    <item name="android:windowFullscreen">false</item>
+
+    <!-- 2. 窗口背景设为透明，防止出现黑底 -->
+    <item name="android:windowBackground">@android:color/transparent</item>
+
+    <!-- 3. 关键：设置状态栏为透明，实现沉浸式（内容延伸到状态栏下） -->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+
+    <!-- 4. 导航栏也设为透明（可选，视设计需求而定） -->
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+
+    <!-- 5. 允许窗口浮动在应用之上 -->
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowNoTitle">true</item>
+  </style>
+
 </resources>
